@@ -83,7 +83,7 @@ merged_summaries = tf.summary.merge_all()
 # keep the configuration file with the model for reproducibility
 shutil.copy('config.json', model_dir)
 
-with tf.Session() as sess:
+with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
 
   # initialize data augmentation
   cifar = cifar10_input.AugmentedCIFAR10Data(raw_cifar, sess, model)
@@ -97,7 +97,7 @@ with tf.Session() as sess:
   for ii in range(max_num_training_steps):
     x_batch, y_batch = cifar.train_data.get_next_batch(batch_size,
                                                        multiple_passes=True)
-
+    print("train step: ", ii)
     # Compute Adversarial Perturbations
     start = timer()
     x_batch_adv = attack.perturb(x_batch, y_batch, sess)
