@@ -49,8 +49,8 @@ class Model(object):
 
     # w28-10 wide residual network (https://arxiv.org/abs/1605.07146v1)
     # use filters = [16, 16, 32, 64] for a non-wide version
-    filters = [16, 160, 320, 640]
-
+    # filters = [16, 160, 320, 640]
+    filters = [16, 16, 32, 64]
 
     # Update hps.num_residual_units to 9
 
