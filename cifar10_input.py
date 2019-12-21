@@ -118,6 +118,7 @@ class DataSubset(object):
         self.ys = ys
         self.batch_start = 0
         self.cur_order = np.random.permutation(self.n)
+        self.adv_xs = xs
 
     def get_next_batch(self, batch_size, multiple_passes=False, reshuffle_after_pass=True):
         if self.n < batch_size:
@@ -141,6 +142,33 @@ class DataSubset(object):
         batch_ys = self.ys[self.cur_order[self.batch_start : batch_end], ...]
         self.batch_start += batch_size
         return batch_xs, batch_ys
+    
+    def get_next_batch_from_adv(self, batch_size, multiple_passes=False):
+        if self.n < batch_size:
+            raise ValueError('Batch size can be at most the dataset size')
+        if not multiple_passes:
+            actual_batch_size = min(batch_size, self.n - self.batch_start)
+            if actual_batch_size <= 0:
+                raise ValueError('Pass through the dataset is complete.')
+            batch_end = self.batch_start + actual_batch_size
+            batch_xs = self.adv_xs[self.cur_order[self.batch_start : batch_end], ...]
+            batch_ys = self.ys[self.cur_order[self.batch_start : batch_end], ...]
+            batch_ind = self.cur_order[self.batch_start : batch_end]
+            self.batch_start += actual_batch_size
+            return batch_xs, batch_ys, batch_ind
+        actual_batch_size = min(batch_size, self.n - self.batch_start)
+        if actual_batch_size < batch_size:
+            self.batch_start = 0
+        batch_end = self.batch_start + batch_size
+        batch_xs = self.adv_xs[self.cur_order[self.batch_start : batch_end], ...]
+        batch_ys = self.ys[self.cur_order[self.batch_start : batch_end], ...]
+        batch_ind = self.cur_order[self.batch_start : batch_end]
+        self.batch_start += batch_size
+        return batch_xs, batch_ys, batch_ind
+    
+    def update_adv_for_batch(self, batch_ind, adv_xs):
+
+        self.adv_xs[batch_ind, ...] = adv_xs  
 
 
 class AugmentedDataSubset(object):
